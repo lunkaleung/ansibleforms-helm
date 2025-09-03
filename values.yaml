@@ -1,0 +1,72 @@
+# Secrets // recommended to overwrite in a private secrets file
+application:
+  server:
+    env:
+      ENCRYPTION_SECRET: <your-secret> # recommended
+      ADMIN_USERNAME: <your-username>  # default admin
+      ADMIN_PASSWORD: <your-password>  # default AnsibleForms!123
+  mysql:
+    user: root                 # required
+    password: AnsibleForms!123 # required
+
+# Application environment variables
+env:
+  HTTPS: "0" # auto sets port to 80 or 443
+  # See ansibleforms.com for all env vars details
+  
+service:
+  server:
+    type: ClusterIP # check to LoadBalancer or enable ingress
+    loadbalancer:
+      ip: 
+  mysql:
+    type: ClusterIP # change to LoadBalancer if you want to expose it
+    loadbalancer:
+      ip:
+
+storage:
+  server:
+    className: <your-storage-class>
+    size: 1Gi
+  mysql:
+    className: <your-storage-class>
+    size: 1Gi
+
+container:
+  server: 
+    image: ansibleguy/ansibleforms:betav6
+    resources:
+      limits:
+        cpu: "0.5"
+        memory: 512Mi
+      requests:
+        cpu: "0.25"
+        memory: 256Mi
+  mysql:
+    image: mysql:latest
+    resources:
+      limits:
+        cpu: "0.5"
+        memory: 512Mi
+      requests:
+        cpu: "0.25"
+        memory: 256Mi
+
+# Ingress configuration
+ingress:
+  enabled: false  # set to true to enable ingress
+  className: nginx
+  hostname: <your-hostname> 
+  path: /
+  pathType: Prefix
+  tls:
+    enabled: true
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  issuer: letsencrypt-prod
+  extraHosts: [] # ["other.example.com"]
+  extraPaths: [] # [{ path: /api, serviceName: server, servicePort: 80 }]
+  extraAnnotations: {}
+  # Add more as needed

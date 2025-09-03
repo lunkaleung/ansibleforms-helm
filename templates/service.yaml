@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: server
+spec:
+  type: {{ .Values.service.server.type }}
+  {{- if and (eq .Values.service.server.type "LoadBalancer") .Values.service.server.loadbalancer.ip }}
+  loadBalancerIP: {{ .Values.service.server.loadbalancer.ip }}
+  {{- end }}
+  ports:
+    - port: {{ if eq (toString .Values.env.HTTPS) "1" }}443{{ else }}80{{ end }}
+      targetPort: {{ if eq (toString .Values.env.HTTPS) "1" }}443{{ else }}80{{ end }}
+  selector:
+    app.kubernetes.io/name: server
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: mysql
+spec:
+  type: {{ .Values.service.mysql.type }}
+  {{- if and (eq .Values.service.mysql.type "LoadBalancer") .Values.service.mysql.loadbalancer.ip }}
+  loadBalancerIP: {{ .Values.service.mysql.loadbalancer.ip }}
+  {{- end }}
+  ports:
+    - port: 3306
+      targetPort: 3306
+  selector:
+    app.kubernetes.io/name: mysql

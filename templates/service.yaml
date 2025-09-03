@@ -9,8 +9,8 @@ spec:
   loadBalancerIP: {{ .Values.service.server.loadbalancer.ip }}
   {{- end }}
   ports:
-    - port: {{ if eq (toString .Values.env.HTTPS) "1" }}443{{ else }}80{{ end }}
-      targetPort: {{ if eq (toString .Values.env.HTTPS) "1" }}443{{ else }}80{{ end }}
+    - port: {{ if eq (toString .Values.application.server.env.HTTPS) "1" }}443{{ else }}80{{ end }}
+      targetPort: {{ if eq (toString .Values.application.server.env.HTTPS) "1" }}443{{ else }}80{{ end }}
   selector:
     app.kubernetes.io/name: server
 ---

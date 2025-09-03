@@ -23,17 +23,17 @@ Edit `values.yaml` to set your desired configuration. For sensitive values, crea
 
 #### Example `values.yaml` sections:
 ```yaml
-namespace: ansibleforms
-
-dbUser: root
-# dbPassword: "your-secret" (override in private file)
-encryptionSecret: "random-32-char-string"
-adminUsername: admin
-adminPassword: AnsibleForms!123
-
-env:
-  HTTPS: 0 # auto sets ports on 80 or 443
-  # ...other env vars (see values.yaml for all options)
+application:
+  server:
+    env:
+      HTTPS: 0 # auto sets ports on 80 or 443
+      # ...other env vars (see values.yaml for all options)
+      ENCRYPTION_SECRET: "random-32-char-string"
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: AnsibleForms!123
+  mysql:
+    user: root
+    password: AnsibleForms!123
 
 storage:
   server:

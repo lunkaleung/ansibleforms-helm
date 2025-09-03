@@ -19,12 +19,12 @@ spec:
         - image: {{ .Values.container.server.image }}
           name: server
           ports:
-            - containerPort: {{ if eq (toString .Values.env.HTTPS) "1" }}443{{ else }}80{{ end }}
+            - containerPort: {{ if eq (toString .Values.application.server.env.HTTPS) "1" }}443{{ else }}80{{ end }}
           env:
             - name: PORT
-              value: "{{ if eq (toString .Values.env.HTTPS) "1" }}443{{ else }}80{{ end }}"
+              value: "{{ if eq (toString .Values.application.server.env.HTTPS) "1" }}443{{ else }}80{{ end }}"
             # Standard env vars from values.yaml
-            {{- range $key, $value := .Values.env }}
+            {{- range $key, $value := .Values.application.server.env }}
             - name: {{ $key }}
               value: "{{ $value }}"
             {{- end }}

@@ -26,7 +26,7 @@ spec:
             # Standard env vars from values.yaml (skip sensitive keys that are provided via secrets)
             {{- $sensitive := dict "ENCRYPTION_SECRET" true "ADMIN_USERNAME" true "ADMIN_PASSWORD" true }}
             {{- range $key, $value := .Values.application.server.env }}
-            {{- if not ($sensitive.Get $key) }}
+            {{- if not (index $sensitive $key) }}
             - name: {{ $key }}
               value: "{{ $value }}"
             {{- end }}

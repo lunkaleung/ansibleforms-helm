@@ -12,35 +12,49 @@ This Helm chart deploys the AnsibleForms application and its MySQL database on K
 
 ## Usage
 
-### 1. Clone and Prepare
-```
-git clone <your-repo>
-cd ansibleforms-helm
+### 1. Configure personal values
+Create a project folder and create a `my_values.yaml` file.
+Edit your `my_values.yaml` to set your desired configuration. For sensitive values, create a private file (e.g. `my-secrets.yaml`) and override them at install time.
+
+#### minimalistic example `values.yaml` without ingress:
+```yaml
+application:
+  server:
+    env:
+      HTTPS: 1 # auto sets port to 443
+      ENCRYPTION_SECRET: "Abc123Abc123Abc123Abc123Abc123Abc1" # optional but recommended, just a 32 char ramdom string
+
+# storage: # not provided -> default storageclass
+
+# container: # not provided -> latest v6 beta
+
+service:
+  server:
+    type: LoadBalancer
+    loadbalancer:
+      ip: 10.0.0.1      # the ip to serve ansibleforms https://10.0.0.1
 ```
 
-### 2. Configure Values
-Edit `values.yaml` to set your desired configuration. For sensitive values, create a private file (e.g. `my-secrets.yaml`) and override them at install time.
-
-#### Example `values.yaml` sections:
+#### Extended Example `values.yaml` with ingress:
 ```yaml
 application:
   server:
     env:
       HTTPS: 0 # auto sets ports on 80 or 443
       # ...other env vars (see values.yaml for all options)
-      ENCRYPTION_SECRET: "random-32-char-string"
+      ENCRYPTION_SECRET: "Abc123Abc123Abc123Abc123Abc123Abc1"
       ADMIN_USERNAME: admin
-      ADMIN_PASSWORD: AnsibleForms!123
+      ADMIN_PASSWORD: MyAppPassword1!!
   mysql:
     user: root
-    password: AnsibleForms!123
+    password: MyDbPassword1!!
 
 storage:
   server:
-    className: nfs-csi
+    className: nfs-csi       # just an example storage provider
     size: 1Gi
   mysql:
-    className: nfs-csi-nomap
+    className: nfs-csi-nomap # just an example storage provider
     size: 1Gi
 
 container:
@@ -65,17 +79,26 @@ container:
 
 service:
   server:
-    type: LoadBalancer
-    loadbalancer:
-      ip: x.x.x.x
+    type: ClusterIP # service is exposed with ingress
   mysql:
     type: ClusterIP
 
 ingress:
-  enabled: false # enable ingress
+  enabled: true # enable ingress
   className: nginx
-  hostname: ansibleforms-dev.charko.be
-  # ...other ingress options
+  hostname: ansibleforms.example.com
+  path: /
+  pathType: Prefix
+  tls:
+    enabled: true
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  issuer: letsencrypt-prod
+  extraHosts: [] # ["other.example.com"]
+  extraPaths: [] # [{ path: /api, serviceName: server, servicePort: 80 }]
+  extraAnnotations: {}  
 ```
 
 ### 3. Install the Chart

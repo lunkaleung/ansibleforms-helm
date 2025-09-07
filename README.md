@@ -12,11 +12,18 @@ This Helm chart deploys the AnsibleForms application and its MySQL database on K
 
 ## Usage
 
-### 1. Configure personal values
-Create a project folder and create a `my_values.yaml` file.
-Edit your `my_values.yaml` to set your desired configuration. For sensitive values, create a private file (e.g. `my-secrets.yaml`) and override them at install time.
+### 1. Clone the helm chart and values.yaml
 
-#### minimalistic example `values.yaml` without ingress:
+```
+git clone https://github.com/ansibleguy76/ansibleforms-helm
+cp ./ansibleforms-helm/values.yaml my_values.yaml
+```
+
+### 2. Configure personal values
+
+Update the my_values.yaml to your taste
+
+#### minimalistic example without ingress:
 ```yaml
 application:
   server:
@@ -35,7 +42,7 @@ service:
       ip: 10.0.0.1      # the ip to serve ansibleforms https://10.0.0.1
 ```
 
-#### Extended Example `values.yaml` with ingress:
+#### Extended Example with ingress:
 ```yaml
 application:
   server:
@@ -102,14 +109,15 @@ ingress:
 ```
 
 ### 3. Install the Chart
+
+Depending on your environment, choose an existing namespace or choose to create a new one.
+
 ```sh
-helm install ansibleforms ./ansibleforms-helm -f my_values.yaml -n ansibleforms
+helm install ansibleforms ./ansibleforms-helm -f ./my_values.yaml -n ansibleforms --create-namespace
 ```
 
 ## Security Best Practices
-- Never commit real secrets to `values.yaml` or your repo.
-- Use a private override file for secrets and add it to `.gitignore`.
-- Use `--set` or `--set-file` for secrets in CI/CD.
+- Use `--set` or `--set-file` to hide secrets
 
 ## Customization
 - All environment variables can be set in `env:`.

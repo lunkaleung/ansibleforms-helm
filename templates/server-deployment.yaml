@@ -23,10 +23,13 @@ spec:
           env:
             - name: PORT
               value: "{{ if eq (toString .Values.application.server.env.HTTPS) "1" }}443{{ else }}80{{ end }}"
-            # Standard env vars from values.yaml
+            # Standard env vars from values.yaml (skip sensitive keys that are provided via secrets)
+            {{- $sensitive := dict "ENCRYPTION_SECRET" true "ADMIN_USERNAME" true "ADMIN_PASSWORD" true }}
             {{- range $key, $value := .Values.application.server.env }}
+            {{- if not ($sensitive.Get $key) }}
             - name: {{ $key }}
               value: "{{ $value }}"
+            {{- end }}
             {{- end }}
             - name: DB_HOST
               value: mysql # is internal pod connection

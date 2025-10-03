@@ -4,14 +4,16 @@ metadata:
   namespace: {{ .Release.Namespace }}
   name: {{ .Release.Name }}-mysql-pvc
   labels:
-    app.kubernetes.io/name: mysql
-    app.kubernetes.io/instance: mysql
-    app.kubernetes.io/component: mysql
-    app.kubernetes.io/part-of: {{ .Release.Name }}
+   app.kubernetes.io/name: mysql
+   app.kubernetes.io/instance: mysql
+   app.kubernetes.io/component: mysql
+   app.kubernetes.io/part-of: {{ .Release.Name }}
 spec:
   accessModes:
     - ReadWriteMany
   resources:
     requests:
       storage: {{ .Values.storage.mysql.size }}
-  storageClassName: {{ .Values.storage.mysql.className }}
+  storageClassName: ''
+  volumeName: {{ .Release.Name }}-mysql-pv
+

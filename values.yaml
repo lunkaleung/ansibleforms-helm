@@ -75,3 +75,10 @@ ingress:
   extraPaths: [] # [{ path: /api, serviceName: server, servicePort: 80 }]
   extraAnnotations: {}
   # Add more as needed
+
+forms:
+  configMap:
+    enabled: false
+    name: ""                          # existing ConfigMap name
+    key: forms.yaml                   # clave dentro del ConfigMap
+    mountPath: /app/dist/persistent/forms.yaml

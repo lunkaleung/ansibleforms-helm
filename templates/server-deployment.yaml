@@ -78,6 +78,10 @@ spec:
               mountPath: {{ .Values.forms.configMap.mountPath }}
               subPath: {{ .Values.forms.configMap.key }}
             {{- end }}
+            {{- if .Values.forms.extraFormsConfigMap.enabled }}
+            - name: forms-extra-config
+              mountPath: {{ .Values.forms.extraFormsConfigMap.mountPath }}
+            {{- end }}
           imagePullPolicy: Always
       restartPolicy: Always
       volumes:
@@ -88,4 +92,9 @@ spec:
         - name: forms-config
           configMap:
             name: {{ .Values.forms.configMap.name }}
+        {{- end }}
+        {{- if .Values.forms.extraFormsConfigMap.enabled }}
+        - name: forms-extra-config
+          configMap:
+            name: {{ .Values.forms.extraFormsConfigMap.name }}
         {{- end }}

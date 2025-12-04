@@ -9,6 +9,7 @@ This Helm chart deploys the AnsibleForms application and its MySQL database on K
 - Storage class and size for both server and MySQL are configurable
 - Ingress is optional and highly customizable (hostname, TLS, annotations, etc.)
 - Service type (ClusterIP, LoadBalancer, NodePort) is configurable, with support for static LoadBalancer IPs
+- (Optional) Support for managing `forms.yaml` and forms/*.yaml definitions via ConfigMaps
 
 ## Usage
 
@@ -107,6 +108,123 @@ ingress:
   extraPaths: [] # [{ path: /api, serviceName: server, servicePort: 80 }]
   extraAnnotations: {}  
 ```
+
+
+
+### 3. Using ConfigMaps for `forms.yaml` and form definitions (optional)
+
+AnsibleForms uses a main configuration file (`forms.yaml`) and can also load additional form definitions from a `forms/` directory inside the persistent folder.
+
+This chart provides optional values to mount those files from ConfigMaps:
+
+```yaml
+forms:
+  configMap:
+    enabled: true
+    name: ansibleforms-forms                # ConfigMap containing the main forms.yaml
+    key: forms.yaml                         # key in the ConfigMap
+    mountPath: /app/dist/persistent/forms.yaml
+
+  extraFormsConfigMap:
+    enabled: true
+    name: ansibleforms-forms-defs          # ConfigMap containing multiple form YAMLs
+    mountPath: /app/dist/persistent/forms  # mounted as a directory
+```
+
+When `forms.configMap.enabled` is `false` (the default), the chart behaves as before and does not mount any extra ConfigMap. The same applies to `extraFormsConfigMap.enabled`.
+
+#### Example: main forms configuration (`forms.yaml`)
+
+The following ConfigMap provides the main `forms.yaml` file, which defines categories, roles, and constants:
+
+```yaml
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ansibleforms-forms
+  namespace: ansibleforms
+data:
+  forms.yaml: |
+    categories:
+      - name: Default
+        icon: bars
+      - name: Demo
+        icon: heart
+      - name: Maintenance
+        icon: cogs
+      - name: Internal
+        icon: cogs
+      - name: Vmware
+        icon: cogs
+    roles:
+      - name: admin
+        groups:
+          - local/admins
+          - ldap/k8admins
+      - name: demo
+        groups:
+          - local/demo
+      - name: public
+        groups: []
+      - name: internal
+        groups:
+          - ldap/internal
+        users:
+          - ldap/FRoca
+    constants:
+      AF_PLAYBOOKS: /app/dist/persistent/playbooks
+```
+
+With the `forms.configMap` values set as shown earlier, this `forms.yaml` will be mounted at `/app/dist/persistent/forms.yaml`, which is the default location used by AnsibleForms.
+
+#### Example: additional form definitions (`forms/*.yaml`)
+
+You can keep each form definition in a separate YAML file within a second ConfigMap. Each key under `data:` becomes a file inside `/app/dist/persistent/forms/`:
+
+```yaml
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ansibleforms-forms-defs
+  namespace: ansibleforms
+data:
+  awx-call-user_creation.yaml: |
+    name: User Creation
+    type: awx
+    template: "jt-or_myawesomeor-create_user"
+    roles:
+      - internal
+    categories:
+      - Internal
+    help: "Form to create FTP users"
+    description: "Launch ftp user creation"
+    fields:
+      - name: survey_user
+        label: Username
+        type: text
+        required: true
+      - name: survey_password
+        label: Password
+        type: text
+        required: true
+      - name: survey_type
+        label: Type
+        type: enum
+        values:
+          - name: general
+            value: general
+          - name: av
+            value: av
+        required: true
+
+  # more forms here, one per key:
+  # otherform.yaml: |
+  #   name: ...
+  #   ...
+```
+
 
 ### 3. Install the Chart
 

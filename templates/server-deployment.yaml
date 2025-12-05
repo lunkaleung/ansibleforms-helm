@@ -73,9 +73,28 @@ spec:
           volumeMounts:
             - mountPath: /app/dist/persistent
               name: server-persistent-storage
+            {{- if .Values.forms.configMap.enabled }}
+            - name: forms-config
+              mountPath: {{ .Values.forms.configMap.mountPath }}
+              subPath: {{ .Values.forms.configMap.key }}
+            {{- end }}
+            {{- if .Values.forms.extraFormsConfigMap.enabled }}
+            - name: forms-extra-config
+              mountPath: {{ .Values.forms.extraFormsConfigMap.mountPath }}
+            {{- end }}
           imagePullPolicy: Always
       restartPolicy: Always
       volumes:
         - name: server-persistent-storage
           persistentVolumeClaim:
             claimName: {{ .Release.Name }}-server-pvc
+        {{- if .Values.forms.configMap.enabled }}
+        - name: forms-config
+          configMap:
+            name: {{ .Values.forms.configMap.name }}
+        {{- end }}
+        {{- if .Values.forms.extraFormsConfigMap.enabled }}
+        - name: forms-extra-config
+          configMap:
+            name: {{ .Values.forms.extraFormsConfigMap.name }}
+        {{- end }}
